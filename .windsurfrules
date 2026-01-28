@@ -1,0 +1,55 @@
+# Project Rules: TodoFlow Mobile App
+
+## Tech Stack
+- **Framework:** React Native with Expo (SDK 50+)
+- **Routing:** Expo Router (File-based navigation)
+- **Language:** TypeScript
+- **State Management:** Zustand (preferred) or React Context
+- **Storage:** Expo SQLite or AsyncStorage for local persistence
+
+## Architecture & Folder Structure
+- **Routing:** All routes must reside in `/app`. Use Route Groups (e.g., `(tabs)`) for organizational clarity.
+- **Source Code:** All non-route logic must reside in `/src`.
+  - `/src/components`: UI components (Atomic design preferred).
+  - `/src/hooks`: Custom hooks for logic.
+  - `/src/store`: State management files.
+- **Styling:** Use NativeWind (Tailwind CSS for React Native) where possible. Fallback to StyleSheet for complex animations.
+
+## Coding Standards
+- Use **Functional Components** and Hooks.
+- Prioritize **FlatList** for lists to ensure mobile performance.
+- Use **SafeViewArea** to handle device notches and status bars.
+- Export components as `export default function Name() {}`.
+
+## Development Workflow
+- Always check for existing types in `@types` or local interfaces before creating new ones.
+- When adding a new screen, always create the file in `/app` and update the relevant `_layout.tsx`.
+
+## Project folder structure
+my-todo-app/
+├── app/                  <-- Expo Router Entry (or move inside /src)
+│   ├── (tabs)/           <-- Route Group for Tab navigation
+│   │   ├── _layout.tsx   <-- Defines the Bottom Tabs
+│   │   ├── index.tsx     <-- The main Todo List (maps to /)
+│   │   └── settings.tsx  <-- Settings screen (maps to /settings)
+│   ├── _layout.tsx       <-- Root Layout (Providers, Stack, etc.)
+│   └── +not-found.tsx    <-- 404 Error page
+├── src/
+│   ├── components/       <-- Reusable UI (TaskItem, CustomButton)
+│   ├── hooks/            <-- Custom logic (useStorage)
+│   ├── constants/        <-- Colors, API keys
+│   └── store/            <-- State management (Zustand or Context)
+├── assets/               <-- Images, Fonts, Icons
+├── app.json              <-- Expo Config
+└── package.json          <-- Dependencies
+
+## Critical Config (package.json)
+For Expo Router to work, your package.json must point to the router entry point:
+
+{
+  "main": "expo-router/entry",
+  "dependencies": {
+    "expo-router": "~3.x.x",
+    ...
+  }
+}
