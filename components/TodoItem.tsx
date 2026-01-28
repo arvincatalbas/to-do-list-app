@@ -1,41 +1,138 @@
-import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Text } from '@/components/Themed';
+import React, { useState } from 'react';
+import { StyleSheet, TouchableOpacity, View, Text, TextInput } from 'react-native';
+import { useTheme } from '../src/contexts/ThemeContext';
 import { Todo } from '../src/store/useTodoStore';
 
 interface TodoItemProps {
   todo: Todo;
   onToggle: (id: string) => void;
+  onEdit: (id: string, text: string) => void;
+  onArchive: (id: string) => void;
+  onRestore: (id: string) => void;
   onDelete: (id: string) => void;
+  isArchived?: boolean;
 }
 
-export default function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
+export default function TodoItem({
+  todo,
+  onToggle,
+  onEdit,
+  onArchive,
+  onRestore,
+  onDelete,
+  isArchived = false
+}: TodoItemProps) {
+  const { colors } = useTheme();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(todo.text);
+
+  const handleEdit = () => {
+    if (isEditing && editText.trim() && editText !== todo.text) {
+      onEdit(todo.id, editText.trim());
+    }
+    setIsEditing(!isEditing);
+    if (!isEditing) {
+      setEditText(todo.text);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditText(todo.text);
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {
+      backgroundColor: colors.surface,
+      borderColor: colors.border,
+      borderWidth: 1,
+    }]}>
       <TouchableOpacity
         style={styles.checkboxContainer}
-        onPress={() => onToggle(todo.id)}
+        onPress={() => !isArchived && onToggle(todo.id)}
+        disabled={isArchived}
       >
-        <View style={[styles.checkbox, todo.completed && styles.checkboxChecked]}>
+        <View style={[styles.checkbox, {
+          borderColor: colors.border,
+          backgroundColor: todo.completed ? colors.primary : 'transparent',
+          opacity: isArchived ? 0.5 : 1,
+        }]}>
           {todo.completed && <Text style={styles.checkmark}>✓</Text>}
         </View>
       </TouchableOpacity>
 
       <View style={styles.textContainer}>
-        <Text style={[styles.text, todo.completed && styles.completedText]}>
-          {todo.text}
-        </Text>
-        <Text style={styles.date}>
-          {todo.createdAt.toLocaleDateString()}
-        </Text>
+        {isEditing ? (
+          <TextInput
+            style={[styles.editInput, {
+              color: colors.text,
+              borderColor: colors.border,
+            }]}
+            value={editText}
+            onChangeText={setEditText}
+            onSubmitEditing={handleEdit}
+            onBlur={handleEdit}
+            multiline={false}
+            autoFocus
+          />
+        ) : (
+          <>
+            <Text style={[styles.text, {
+              color: todo.completed || isArchived ? colors.textSecondary : colors.text,
+              textDecorationLine: (todo.completed || isArchived) ? 'line-through' : 'none',
+            }]}>
+              {todo.text}
+            </Text>
+            <Text style={[styles.date, { color: colors.textSecondary }]}>
+              {todo.createdAt.toLocaleDateString()}
+            </Text>
+          </>
+        )}
       </View>
 
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => onDelete(todo.id)}
-      >
-        <Text style={styles.deleteButtonText}>×</Text>
-      </TouchableOpacity>
+      <View style={styles.actionButtons}>
+        {!isArchived ? (
+          <>
+            <TouchableOpacity
+              style={[styles.editButton, { backgroundColor: colors.secondary }]}
+              onPress={handleEdit}
+            >
+              <Text style={styles.editButtonText}>
+                {isEditing ? '✓' : '✏️'}
+              </Text>
+            </TouchableOpacity>
+            {isEditing && (
+              <TouchableOpacity
+                style={[styles.cancelButton, { backgroundColor: colors.textSecondary }]}
+                onPress={handleCancel}
+              >
+                <Text style={styles.cancelButtonText}>✕</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={[styles.archiveButton, { backgroundColor: colors.warning }]}
+              onPress={() => onArchive(todo.id)}
+            >
+              <Text style={styles.archiveButtonText}>📦</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity
+              style={[styles.restoreButton, { backgroundColor: colors.success }]}
+              onPress={() => onRestore(todo.id)}
+            >
+              <Text style={styles.restoreButtonText}>↩️</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.deleteButton, { backgroundColor: colors.error }]}
+              onPress={() => onDelete(todo.id)}
+            >
+              <Text style={styles.deleteButtonText}>🗑️</Text>
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
     </View>
   );
 }
@@ -44,7 +141,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
     padding: 16,
     marginBottom: 12,
     borderRadius: 12,
@@ -62,13 +158,8 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#ddd',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  checkboxChecked: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
   },
   checkmark: {
     color: '#fff',
@@ -80,28 +171,78 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
-    color: '#333',
     marginBottom: 4,
   },
-  completedText: {
-    textDecorationLine: 'line-through',
-    color: '#999',
+  editInput: {
+    fontSize: 16,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 4,
   },
   date: {
     fontSize: 12,
-    color: '#999',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  editButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 4,
+  },
+  editButtonText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  cancelButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 4,
+  },
+  cancelButtonText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  archiveButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  archiveButtonText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  restoreButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 4,
+  },
+  restoreButtonText: {
+    color: '#fff',
+    fontSize: 14,
   },
   deleteButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#FF3B30',
     justifyContent: 'center',
     alignItems: 'center',
   },
   deleteButtonText: {
     color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 14,
   },
 });

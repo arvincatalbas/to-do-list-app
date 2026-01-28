@@ -27,21 +27,47 @@
 
 ## Project folder structure
 my-todo-app/
-├── app/                  <-- Expo Router Entry (or move inside /src)
+├── app/                  <-- Expo Router Entry
 │   ├── (tabs)/           <-- Route Group for Tab navigation
-│   │   ├── _layout.tsx   <-- Defines the Bottom Tabs
-│   │   ├── index.tsx     <-- The main Todo List (maps to /)
-│   │   └── settings.tsx  <-- Settings screen (maps to /settings)
-│   ├── _layout.tsx       <-- Root Layout (Providers, Stack, etc.)
-│   └── +not-found.tsx    <-- 404 Error page
+│   │   ├── _layout.tsx   <-- Defines the Bottom Tabs with AuthGuard
+│   │   ├── index.tsx     <-- The main Todo List (Active Tasks)
+│   │   ├── settings.tsx  <-- Completed Tasks screen
+│   │   ├── archive.tsx   <-- Archived Tasks screen
+│   │   └── profile.tsx   <-- User Profile screen
+│   ├── _layout.tsx       <-- Root Layout (Providers, Stack, AuthRedirect)
+│   ├── sign-in.tsx       <-- Sign In screen
+│   ├── sign-up.tsx       <-- Sign Up screen
+│   ├── profile.tsx       <-- Standalone Profile screen
+│   ├── +not-found.tsx    <-- 404 Error page
+│   └── +html.tsx         <-- HTML template
 ├── src/
-│   ├── components/       <-- Reusable UI (TaskItem, CustomButton)
-│   ├── hooks/            <-- Custom logic (useStorage)
-│   ├── constants/        <-- Colors, API keys
-│   └── store/            <-- State management (Zustand or Context)
-├── assets/               <-- Images, Fonts, Icons
-├── app.json              <-- Expo Config
-└── package.json          <-- Dependencies
+│   ├── components/       <-- Reusable UI components
+│   │   ├── TodoItem.tsx  <-- Task item with edit/archive/restore
+│   │   ├── ThemeToggle.tsx <-- Theme switcher component
+│   │   ├── AuthGuard.tsx <-- Authentication guard component
+│   │   ├── AuthRedirect.tsx <-- Initial auth routing
+│   │   └── ExternalLink.tsx <-- External link component
+│   ├── contexts/         <-- React Context providers
+│   │   ├── ThemeContext.tsx <-- Theme management context
+│   │   └── AuthContext.tsx <-- Authentication context
+│   ├── hooks/            <-- Custom logic hooks
+│   │   ├── useClientOnlyValue.ts
+│   │   └── useClientOnlyValue.web.ts
+│   ├── store/            <-- State management
+│   │   ├── useTodoStore.ts <-- Todo state management (Zustand)
+│   │   └── .gitkeep
+│   └── constants/        <-- App constants and configs
+├── assets/               <-- Static assets
+│   ├── fonts/            <-- Custom fonts
+│   └── images/           <-- Images and icons
+├── .git/                 <-- Git repository
+├── .vscode/              <-- VS Code settings
+│   ├── extensions.json
+│   └── settings.json
+├── app.json              <-- Expo configuration
+├── package.json          <-- Dependencies and scripts
+├── package-lock.json     <-- Lock file for dependencies
+└── .windsurfrules        <-- Development guidelines
 
 ## Critical Config (package.json)
 For Expo Router to work, your package.json must point to the router entry point:

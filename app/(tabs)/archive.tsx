@@ -6,44 +6,43 @@ import { useTodoStore } from '../../src/store/useTodoStore';
 import TodoItem from '../../components/TodoItem';
 import ThemeToggle from '../../components/ThemeToggle';
 
-export default function Settings() {
-  const { getCompletedTodos, toggleTodo, updateTodo, archiveTodo, clearCompleted } = useTodoStore();
+export default function Archive() {
+  const { getArchivedTodos, restoreTodo, deleteTodo } = useTodoStore();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-
-  const completedTodos = getCompletedTodos();
+  
+  const archivedTodos = getArchivedTodos();
 
   return (
-    <View style={[styles.container, {
-      backgroundColor: colors.background,
-      paddingTop: insets.top,
-      paddingBottom: insets.bottom
+    <View style={[styles.container, { 
+      backgroundColor: colors.background, 
+      paddingTop: insets.top, 
+      paddingBottom: insets.bottom 
     }]}>
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>Completed Tasks</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Archived Tasks</Text>
         <ThemeToggle />
       </View>
-
-      {completedTodos.length > 0 && (
-        <TouchableOpacity
-          style={[styles.clearButton, { backgroundColor: colors.error }]}
-          onPress={clearCompleted}
-        >
-          <Text style={styles.clearButtonText}>Clear All Completed</Text>
-        </TouchableOpacity>
+      
+      {archivedTodos.length > 0 && (
+        <View style={styles.infoContainer}>
+          <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+            {archivedTodos.length} archived {archivedTodos.length === 1 ? 'task' : 'tasks'}
+          </Text>
+        </View>
       )}
 
       <FlatList
-        data={completedTodos}
+        data={archivedTodos}
         renderItem={({ item }) => (
           <TodoItem
             todo={item}
-            onToggle={toggleTodo}
-            onEdit={updateTodo}
-            onArchive={archiveTodo}
-            onRestore={() => { }}
-            onDelete={() => { }}
-            isArchived={false}
+            onToggle={() => {}} // Not needed for archived todos
+            onEdit={() => {}} // Not needed for archived todos
+            onArchive={() => {}} // Not needed for archived todos
+            onRestore={restoreTodo}
+            onDelete={deleteTodo}
+            isArchived={true}
           />
         )}
         keyExtractor={(item) => item.id}
@@ -52,10 +51,13 @@ export default function Settings() {
         contentContainerStyle={styles.listContent}
       />
 
-      {completedTodos.length === 0 && (
+      {archivedTodos.length === 0 && (
         <View style={styles.emptyState}>
           <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-            No completed tasks yet
+            No archived tasks yet
+          </Text>
+          <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>
+            Archive tasks from the main or completed screens to see them here
           </Text>
         </View>
       )}
@@ -78,17 +80,15 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
   },
-  clearButton: {
+  infoContainer: {
     marginHorizontal: 20,
     marginBottom: 20,
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
   },
-  clearButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+  infoText: {
+    fontSize: 14,
+    textAlign: 'center',
   },
   list: {
     flex: 1,
@@ -104,6 +104,11 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
     textAlign: 'center',
   },
 });

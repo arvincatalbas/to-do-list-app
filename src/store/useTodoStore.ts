@@ -6,18 +6,24 @@ export interface Todo {
   completed: boolean;
   createdAt: Date;
   updatedAt: Date;
+  isArchived: boolean;
 }
 
 interface TodoStore {
   todos: Todo[];
   addTodo: (text: string) => void;
   toggleTodo: (id: string) => void;
-  deleteTodo: (id: string) => void;
   updateTodo: (id: string, text: string) => void;
+  archiveTodo: (id: string) => void;
+  restoreTodo: (id: string) => void;
+  deleteTodo: (id: string) => void;
   clearCompleted: () => void;
+  getActiveTodos: () => Todo[];
+  getCompletedTodos: () => Todo[];
+  getArchivedTodos: () => Todo[];
 }
 
-export const useTodoStore = create<TodoStore>((set) => ({
+export const useTodoStore = create<TodoStore>((set, get) => ({
   todos: [],
 
   addTodo: (text: string) =>
@@ -30,6 +36,7 @@ export const useTodoStore = create<TodoStore>((set) => ({
           completed: false,
           createdAt: new Date(),
           updatedAt: new Date(),
+          isArchived: false,
         },
       ],
     })),
@@ -43,11 +50,6 @@ export const useTodoStore = create<TodoStore>((set) => ({
       ),
     })),
 
-  deleteTodo: (id: string) =>
-    set((state: TodoStore) => ({
-      todos: state.todos.filter((todo: Todo) => todo.id !== id),
-    })),
-
   updateTodo: (id: string, text: string) =>
     set((state: TodoStore) => ({
       todos: state.todos.map((todo: Todo) =>
@@ -57,8 +59,46 @@ export const useTodoStore = create<TodoStore>((set) => ({
       ),
     })),
 
+  archiveTodo: (id: string) =>
+    set((state: TodoStore) => ({
+      todos: state.todos.map((todo: Todo) =>
+        todo.id === id
+          ? { ...todo, isArchived: true, updatedAt: new Date() }
+          : todo
+      ),
+    })),
+
+  restoreTodo: (id: string) =>
+    set((state: TodoStore) => ({
+      todos: state.todos.map((todo: Todo) =>
+        todo.id === id
+          ? { ...todo, isArchived: false, updatedAt: new Date() }
+          : todo
+      ),
+    })),
+
+  deleteTodo: (id: string) =>
+    set((state: TodoStore) => ({
+      todos: state.todos.filter((todo: Todo) => todo.id !== id),
+    })),
+
   clearCompleted: () =>
     set((state: TodoStore) => ({
-      todos: state.todos.filter((todo: Todo) => !todo.completed),
+      todos: state.todos.filter((todo: Todo) => !todo.completed || todo.isArchived),
     })),
+
+  getActiveTodos: () => {
+    const { todos } = get();
+    return todos.filter(todo => !todo.completed && !todo.isArchived);
+  },
+
+  getCompletedTodos: () => {
+    const { todos } = get();
+    return todos.filter(todo => todo.completed && !todo.isArchived);
+  },
+
+  getArchivedTodos: () => {
+    const { todos } = get();
+    return todos.filter(todo => todo.isArchived);
+  },
 }));
