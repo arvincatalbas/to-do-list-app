@@ -1,8 +1,8 @@
-import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
-import { useTheme } from '../../src/contexts/ThemeContext';
+import React from 'react';
 import AuthGuard from '../../components/AuthGuard';
+import { useTheme } from '../../src/contexts/ThemeContext';
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
@@ -50,8 +50,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="profile"
           options={{
-            title: 'Profile',
-            tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+            href: null,
           }}
         />
       </Tabs>

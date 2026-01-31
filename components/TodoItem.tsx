@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, Text, TextInput } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../src/contexts/ThemeContext';
 import { Todo } from '../src/store/useTodoStore';
 
@@ -46,6 +46,7 @@ export default function TodoItem({
       backgroundColor: colors.surface,
       borderColor: colors.border,
       borderWidth: 1,
+      shadowColor: colors.primary,
     }]}>
       <TouchableOpacity
         style={styles.checkboxContainer}
@@ -142,21 +143,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    marginBottom: 12,
-    borderRadius: 12,
+    marginBottom: 14,
+    borderRadius: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 5,
   },
   checkboxContainer: {
     marginRight: 12,
   },
   checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
@@ -171,13 +172,13 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   editInput: {
     fontSize: 16,
     borderWidth: 1,
-    borderRadius: 8,
-    padding: 8,
+    borderRadius: 10,
+    padding: 10,
     marginBottom: 4,
   },
   date: {
@@ -188,9 +189,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   editButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 4,
@@ -200,9 +201,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   cancelButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 4,
@@ -212,9 +213,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   archiveButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -223,9 +224,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   restoreButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 4,
@@ -235,9 +236,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   deleteButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     justifyContent: 'center',
     alignItems: 'center',
   },

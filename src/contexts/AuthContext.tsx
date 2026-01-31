@@ -1,10 +1,13 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { User as SupabaseUser } from '@supabase/supabase-js';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 export interface User {
   id: string;
   email: string;
   name: string;
   createdAt: Date;
+  photoUri?: string;
 }
 
 interface AuthContextType {
@@ -12,10 +15,20 @@ interface AuthContextType {
   isLoading: boolean;
   signUp: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signOut: () => void;
+  signOut: () => Promise<void>;
+  updateProfile: (updates: { name?: string; photoUri?: string }) => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Helper function to convert Supabase user to our User interface
+const supabaseUserToUser = (supabaseUser: SupabaseUser): User => ({
+  id: supabaseUser.id,
+  email: supabaseUser.email || '',
+  name: supabaseUser.user_metadata?.name || supabaseUser.email?.split('@')[0] || 'User',
+  createdAt: new Date(supabaseUser.created_at),
+  photoUri: supabaseUser.user_metadata?.photo_uri,
+});
 
 export function useAuth() {
   const context = useContext(AuthContext);
@@ -34,108 +47,117 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in (from localStorage/session)
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = () => {
-    try {
-      // In a real app, you'd check secure storage or validate tokens
-      const savedUser = localStorage.getItem('user');
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
+    // Get initial session
+    const getInitialSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(supabaseUserToUser(session.user));
       }
-    } catch (error) {
-      console.log('Error checking auth status:', error);
-    } finally {
       setIsLoading(false);
-    }
-  };
+    };
+
+    getInitialSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session?.user) {
+          setUser(supabaseUserToUser(session.user));
+        } else {
+          setUser(null);
+        }
+        setIsLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const signUp = async (email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      // Basic validation
-      if (!email || !password || !name) {
-        return { success: false, error: 'All fields are required' };
-      }
-
-      if (password.length < 6) {
-        return { success: false, error: 'Password must be at least 6 characters' };
-      }
-
-      // Check if user already exists (in real app, this would be an API call)
-      const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-      if (existingUsers.find((u: any) => u.email === email)) {
-        return { success: false, error: 'User already exists' };
-      }
-
-      // Create new user
-      const newUser: User = {
-        id: Date.now().toString(),
+      const { error } = await supabase.auth.signUp({
         email,
-        name,
-        createdAt: new Date(),
+        password,
+        options: {
+          data: {
+            name,
+          },
+        },
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return {
+        success: true,
+        error: 'Please check your email to confirm your account. You can also sign in directly.'
       };
-
-      // Save user (in real app, this would be an API call)
-      existingUsers.push({ ...newUser, password });
-      localStorage.setItem('users', JSON.stringify(existingUsers));
-
-      // Auto sign in after successful registration
-      setUser(newUser);
-      localStorage.setItem('user', JSON.stringify(newUser));
-
-      return { success: true };
     } catch (error) {
-      return { success: false, error: 'Registration failed' };
+      return { success: false, error: 'An unexpected error occurred' };
     }
   };
 
   const signIn = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      // Basic validation
-      if (!email || !password) {
-        return { success: false, error: 'Email and password are required' };
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        // Handle specific email confirmation error
+        if (error.message.includes('Email not confirmed')) {
+          return {
+            success: false,
+            error: 'Please check your email and click the confirmation link. If you don\'t see the email, check your spam folder.'
+          };
+        }
+        return { success: false, error: error.message };
       }
-
-      // Check credentials (in real app, this would be an API call)
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      const foundUser = users.find((u: any) => u.email === email && u.password === password);
-
-      if (!foundUser) {
-        return { success: false, error: 'Invalid email or password' };
-      }
-
-      // Set user (without password)
-      const userWithoutPassword: User = {
-        id: foundUser.id,
-        email: foundUser.email,
-        name: foundUser.name,
-        createdAt: foundUser.createdAt,
-      };
-
-      setUser(userWithoutPassword);
-      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
 
       return { success: true };
     } catch (error) {
-      return { success: false, error: 'Sign in failed' };
+      return { success: false, error: 'An unexpected error occurred' };
     }
   };
 
-  const signOut = () => {
-    setUser(null);
-    localStorage.removeItem('user');
+  const signOut = async () => {
+    await supabase.auth.signOut();
+  };
+
+  const updateProfile = async (updates: { name?: string; photoUri?: string }): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: updates,
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      // Update local user state
+      if (user) {
+        setUser({ ...user, ...updates });
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'An unexpected error occurred' };
+    }
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      isLoading,
-      signUp,
-      signIn,
-      signOut,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        signUp,
+        signIn,
+        signOut,
+        updateProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

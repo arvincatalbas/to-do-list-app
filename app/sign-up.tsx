@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View, Text, Alert } from 'react-native';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../src/contexts/ThemeContext';
 import { useAuth } from '../src/contexts/AuthContext';
+import { useTheme } from '../src/contexts/ThemeContext';
 
 export default function SignUp() {
   const [name, setName] = useState('');
@@ -11,7 +12,9 @@ export default function SignUp() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -29,10 +32,10 @@ export default function SignUp() {
     }
 
     setIsLoading(true);
-    
+
     try {
       const result = await signUp(email.trim(), password, name.trim());
-      
+
       if (result.success) {
         Alert.alert('Success', 'Account created successfully!', [
           { text: 'OK', onPress: () => router.replace('/(tabs)') }
@@ -52,10 +55,10 @@ export default function SignUp() {
   };
 
   return (
-    <View style={[styles.container, { 
-      backgroundColor: colors.background, 
-      paddingTop: insets.top, 
-      paddingBottom: insets.bottom 
+    <View style={[styles.container, {
+      backgroundColor: colors.background,
+      paddingTop: insets.top,
+      paddingBottom: insets.bottom
     }]}>
       <View style={styles.content}>
         <Text style={[styles.title, { color: colors.text }]}>Create Account</Text>
@@ -65,7 +68,7 @@ export default function SignUp() {
 
         <View style={styles.form}>
           <TextInput
-            style={[styles.input, { 
+            style={[styles.input, {
               backgroundColor: colors.surface,
               borderColor: colors.border,
               color: colors.text,
@@ -78,7 +81,7 @@ export default function SignUp() {
           />
 
           <TextInput
-            style={[styles.input, { 
+            style={[styles.input, {
               backgroundColor: colors.surface,
               borderColor: colors.border,
               color: colors.text,
@@ -91,31 +94,55 @@ export default function SignUp() {
             autoCapitalize="none"
           />
 
-          <TextInput
-            style={[styles.input, { 
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-              color: colors.text,
-            }]}
-            placeholder="Password"
-            placeholderTextColor={colors.textSecondary}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={[styles.input, styles.passwordInput, {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                color: colors.text,
+              }]}
+              placeholder="Password"
+              placeholderTextColor={colors.textSecondary}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <FontAwesome
+                name={showPassword ? 'eye' : 'eye-slash'}
+                size={20}
+                color={colors.textSecondary}
+              />
+            </TouchableOpacity>
+          </View>
 
-          <TextInput
-            style={[styles.input, { 
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-              color: colors.text,
-            }]}
-            placeholder="Confirm Password"
-            placeholderTextColor={colors.textSecondary}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={[styles.input, styles.passwordInput, {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                color: colors.text,
+              }]}
+              placeholder="Confirm Password"
+              placeholderTextColor={colors.textSecondary}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showConfirmPassword}
+            />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              <FontAwesome
+                name={showConfirmPassword ? 'eye' : 'eye-slash'}
+                size={20}
+                color={colors.textSecondary}
+              />
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
             style={[styles.signUpButton, { backgroundColor: colors.primary }]}
@@ -151,10 +178,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 24,
+    paddingVertical: 16,
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
+    fontSize: 34,
+    fontWeight: '800',
+    letterSpacing: -0.6,
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -169,22 +198,40 @@ const styles = StyleSheet.create({
   input: {
     height: 56,
     borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
+    borderRadius: 16,
+    paddingHorizontal: 18,
     fontSize: 16,
     marginBottom: 16,
   },
+  passwordContainer: {
+    position: 'relative',
+    marginBottom: 16,
+  },
+  passwordInput: {
+    paddingRight: 50,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 16,
+    top: 18,
+    padding: 5,
+  },
   signUpButton: {
     height: 56,
-    borderRadius: 12,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 6,
   },
   signUpButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   footer: {
     flexDirection: 'row',

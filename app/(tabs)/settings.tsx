@@ -1,10 +1,9 @@
 import React from 'react';
-import { StyleSheet, FlatList, TouchableOpacity, View, Text } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import TodoItem from '../../components/TodoItem';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { useTodoStore } from '../../src/store/useTodoStore';
-import TodoItem from '../../components/TodoItem';
-import ThemeToggle from '../../components/ThemeToggle';
 
 export default function Settings() {
   const { getCompletedTodos, toggleTodo, updateTodo, archiveTodo, clearCompleted } = useTodoStore();
@@ -21,7 +20,6 @@ export default function Settings() {
     }]}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>Completed Tasks</Text>
-        <ThemeToggle />
       </View>
 
       {completedTodos.length > 0 && (
@@ -72,17 +70,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 30,
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
   clearButton: {
     marginHorizontal: 20,
-    marginBottom: 20,
-    padding: 16,
-    borderRadius: 12,
+    marginBottom: 16,
+    paddingVertical: 14,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 5,
     alignItems: 'center',
   },
   clearButtonText: {

@@ -1,11 +1,11 @@
-import React from 'react';
-import { StyleSheet, TouchableOpacity, View, Text, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import React from 'react';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../src/contexts/ThemeContext';
-import { useAuth } from '../src/contexts/AuthContext';
-import { useTodoStore } from '../src/store/useTodoStore';
 import ThemeToggle from '../components/ThemeToggle';
+import { useAuth } from '../src/contexts/AuthContext';
+import { useTheme } from '../src/contexts/ThemeContext';
+import { useTodoStore } from '../src/store/useTodoStore';
 
 export default function Profile() {
   const router = useRouter();
@@ -24,8 +24,8 @@ export default function Profile() {
       'Are you sure you want to sign out?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Sign Out', 
+        {
+          text: 'Sign Out',
           style: 'destructive',
           onPress: () => {
             signOut();
@@ -53,14 +53,23 @@ export default function Profile() {
   }
 
   return (
-    <View style={[styles.container, { 
-      backgroundColor: colors.background, 
-      paddingTop: insets.top, 
-      paddingBottom: insets.bottom 
+    <View style={[styles.container, {
+      backgroundColor: colors.background,
+      paddingTop: insets.top,
+      paddingBottom: insets.bottom
     }]}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Text style={[styles.backButtonText, { color: colors.text }]}>
+              ←
+            </Text>
+          </TouchableOpacity>
           <Text style={[styles.title, { color: colors.text }]}>Profile</Text>
+          <View style={styles.placeholder} />
           <ThemeToggle />
         </View>
 
@@ -70,7 +79,7 @@ export default function Profile() {
               {user.name.charAt(0).toUpperCase()}
             </Text>
           </View>
-          
+
           <View style={styles.userInfo}>
             <Text style={[styles.userName, { color: colors.text }]}>
               {user.name}
@@ -93,7 +102,7 @@ export default function Profile() {
 
         <View style={[styles.statsContainer, { backgroundColor: colors.surface }]}>
           <Text style={[styles.statsTitle, { color: colors.text }]}>Task Statistics</Text>
-          
+
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
               <Text style={[styles.statNumber, { color: colors.primary }]}>
@@ -103,7 +112,7 @@ export default function Profile() {
                 Active Tasks
               </Text>
             </View>
-            
+
             <View style={styles.statItem}>
               <Text style={[styles.statNumber, { color: colors.success }]}>
                 {completedTodos.length}
@@ -112,7 +121,7 @@ export default function Profile() {
                 Completed
               </Text>
             </View>
-            
+
             <View style={styles.statItem}>
               <Text style={[styles.statNumber, { color: colors.warning }]}>
                 {archivedTodos.length}
@@ -178,6 +187,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     marginBottom: 24,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backButtonText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  placeholder: {
+    width: 40,
+    height: 40,
   },
   title: {
     fontSize: 28,

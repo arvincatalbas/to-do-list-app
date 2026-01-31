@@ -1,29 +1,27 @@
 import React from 'react';
-import { StyleSheet, FlatList, TouchableOpacity, View, Text } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import TodoItem from '../../components/TodoItem';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { useTodoStore } from '../../src/store/useTodoStore';
-import TodoItem from '../../components/TodoItem';
-import ThemeToggle from '../../components/ThemeToggle';
 
 export default function Archive() {
   const { getArchivedTodos, restoreTodo, deleteTodo } = useTodoStore();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  
+
   const archivedTodos = getArchivedTodos();
 
   return (
-    <View style={[styles.container, { 
-      backgroundColor: colors.background, 
-      paddingTop: insets.top, 
-      paddingBottom: insets.bottom 
+    <View style={[styles.container, {
+      backgroundColor: colors.background,
+      paddingTop: insets.top,
+      paddingBottom: insets.bottom
     }]}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>Archived Tasks</Text>
-        <ThemeToggle />
       </View>
-      
+
       {archivedTodos.length > 0 && (
         <View style={styles.infoContainer}>
           <Text style={[styles.infoText, { color: colors.textSecondary }]}>
@@ -37,9 +35,9 @@ export default function Archive() {
         renderItem={({ item }) => (
           <TodoItem
             todo={item}
-            onToggle={() => {}} // Not needed for archived todos
-            onEdit={() => {}} // Not needed for archived todos
-            onArchive={() => {}} // Not needed for archived todos
+            onToggle={() => { }} // Not needed for archived todos
+            onEdit={() => { }} // Not needed for archived todos
+            onArchive={() => { }} // Not needed for archived todos
             onRestore={restoreTodo}
             onDelete={deleteTodo}
             isArchived={true}
@@ -74,17 +72,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 30,
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
   infoContainer: {
     marginHorizontal: 20,
-    marginBottom: 20,
-    padding: 12,
-    borderRadius: 8,
+    marginBottom: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 4,
   },
   infoText: {
     fontSize: 14,

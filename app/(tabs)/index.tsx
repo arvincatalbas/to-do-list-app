@@ -1,16 +1,19 @@
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, FlatList, Keyboard, View, Text } from 'react-native';
+import { FlatList, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import TodoItem from '../../components/TodoItem';
+import { useAuth } from '../../src/contexts/AuthContext';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { useTodoStore } from '../../src/store/useTodoStore';
-import TodoItem from '../../components/TodoItem';
-import ThemeToggle from '../../components/ThemeToggle';
 
 export default function Home() {
   const [text, setText] = useState('');
   const { getActiveTodos, addTodo, toggleTodo, updateTodo, archiveTodo } = useTodoStore();
+  const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const { colors, isDark } = useTheme();
+  const router = useRouter();
 
   const activeTodos = getActiveTodos();
 
@@ -30,7 +33,14 @@ export default function Home() {
     }]}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>My Tasks</Text>
-        <ThemeToggle />
+        <TouchableOpacity
+          style={[styles.profileIcon, { backgroundColor: colors.primary }]}
+          onPress={() => router.push('/profile')}
+        >
+          <Text style={styles.profileIconText}>
+            {user?.name?.charAt(0).toUpperCase() || 'U'}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={[styles.inputContainer, {
@@ -97,42 +107,70 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 30,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
+  profileIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  profileIconText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#fff',
   },
   inputContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
     marginHorizontal: 20,
-    marginBottom: 20,
-    borderRadius: 12,
+    marginBottom: 16,
+    borderRadius: 18,
+    paddingHorizontal: 18,
+    paddingVertical: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    elevation: 5,
   },
   input: {
     flex: 1,
-    padding: 16,
     fontSize: 16,
+    paddingVertical: 14,
   },
   addButton: {
-    width: 50,
+    marginLeft: 12,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 12,
-    marginRight: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 6,
   },
   addButtonText: {
-    fontSize: 24,
     color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '700',
   },
   list: {
     flex: 1,
   },
   listContent: {
     paddingHorizontal: 20,
+    paddingBottom: 16,
   },
   emptyState: {
     flex: 1,
